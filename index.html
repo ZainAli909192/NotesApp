@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./form.css">
+<link rel="stylesheet" href="navbar.css">
+<link rel="stylesheet" href="popup.css">
+<title>Notes Taking App</title>
+
+
+</head>
+<body>
+    
+        <div class="popup-screen">
+            <div class="popup-box">
+                <!-- <i class="fas fa-times close-btn"></i> -->
+                
+                <img src="tick.png" height="70px" alt="">
+                <p>
+                    Your Notes are stored successfully!
+                </p>
+                <button class=" btn close-btn">Ok</button>
+                <!-- <a href="#" class="btn close-btn">Ok</a> -->
+            </div>
+        </div>
+        
+      
+    <div class="navbar">
+        <div class="logo">
+          <img src="logo.png" height="60px" alt="Logo">
+        </div>
+        <div class="navbar-links">
+          <a class="active b" href="#" onclick="showTakeNotes()">Take Notes</a>
+          <a href="#" onclick="showViewNotes()">View Notes</a>
+          <a href="#" id="deleteData">Delete All Data</a>
+
+        </div>
+      </div>
+      
+
+<div class="container" id="takeNotesSection">
+  <h2>Create a New Note</h2>
+
+  
+<form id="noteForm" onsubmit="return validateForm()">
+    <label for="author">Author Name:</label>
+    <input type="text" id="author" name="author">
+    <span id="authorError" class="error"></span>
+    
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" oninput="togglePurposeField()">
+    <span id="titleError" class="error"></span>
+    
+    <!-- Add purpose field with a label -->
+    <label id="purposeLabel" for="purpose">Purpose:</label>
+    <input type="text" id="purpose" name="purpose">
+    <span id="purposeError" class="error"></span>
+    
+    <label for="notes">Notes:</label>
+    <textarea id="notes" name="notes" rows="4" cols="50"></textarea>
+    <span id="notesError" class="error"></span>
+    
+    <input type="submit" value="Submit">
+  </form>
+</div>
+
+<!-- view notes -->
+<div class="container" id="viewNotesSection" style="display: none;">
+  <h2>View Notes</h2>
+
+  <table id="notesTable">
+    <thead>
+      <tr>
+        <th>Author</th>
+        <th>Title</th>
+        <th>Purpose</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="notesTableBody">
+      <!-- Notes will be dynamically populated here -->
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <div class="footer-container">
+    <p>&copy; 2024 All rights reserved.
+    </p>
+  </div>
+</footer>
+
+
+
+<script>
+function validateForm() {
+  var author = document.getElementById("author").value;
+  var title = document.getElementById("title").value;
+  var purpose = document.getElementById("purpose").value;
+  var notes = document.getElementById("notes").value;
+  
+  var authorError = document.getElementById("authorError");
+  var titleError = document.getElementById("titleError");
+  var purposeError = document.getElementById("purposeError");
+  var notesError = document.getElementById("notesError");
+  
+  authorError.innerHTML = titleError.innerHTML = purposeError.innerHTML = notesError.innerHTML = "";
+  
+  if (author === "") {
+    authorError.innerHTML = "Author name is required";
+    return false;
+  }
+ else if (title === "") {
+    titleError.innerHTML = "Title is required";
+    return false;
+  }
+  else  if (document.getElementById("purposeLabel").style.display !== "none" && purpose === "") {
+    purposeError.innerHTML = "Purpose is required";
+    return false;
+  }
+  else if (notes === "") {
+    notesError.innerHTML = "Notes are required";
+    return false;
+  }
+  showpopup();
+  // Save data to local storage
+  var noteData = {
+    author: author,
+    title: title,
+    purpose: purpose,
+    notes: notes
+  };
+  var allNotes = JSON.parse(localStorage.getItem('allNotes')) || [];
+  allNotes.push(noteData);
+  localStorage.setItem('allNotes', JSON.stringify(allNotes));
+  
+  // Optionally, clear form fields after submission
+  document.getElementById("noteForm").reset();
+  
+  return true;
+}
+
+function togglePurposeField() {
+  var title = document.getElementById("title").value;
+  var purposeLabel = document.getElementById("purposeLabel");
+  var purpose = document.getElementById("purpose");
+  
+  if (title.trim() !== "") {
+    purposeLabel.style.display = "block";
+    purpose.style.display = "block";
+  } else {
+    purposeLabel.style.display = "none";
+    purpose.style.display = "none";
+  }
+}
+
+function showTakeNotes() {
+  document.getElementById("takeNotesSection").style.display = "block";
+  document.getElementById("viewNotesSection").style.display = "none";
+  document.querySelector(".navbar a.active").classList.remove("active");
+  document.querySelectorAll(".navbar a")[0].classList.add("active");
+}
+
+function showViewNotes() {
+  document.getElementById("takeNotesSection").style.display = "none";
+  document.getElementById("viewNotesSection").style.display = "block";
+  document.querySelector(".navbar a.active").classList.remove("active");
+  document.querySelectorAll(".navbar a")[1].classList.add("active");
+  displayNotes();
+}
+
+function displayNotes() {
+  var allNotes = JSON.parse(localStorage.getItem('allNotes')) || [];
+  var tableBody = document.getElementById("notesTableBody");
+  tableBody.innerHTML = "";
+  allNotes.forEach(function(note) {
+    var row = "<tr>";
+    row += "<td>" + note.author + "</td>";
+    row += "<td>" + note.title + "</td>";
+    row += "<td>" + (note.purpose || "-") + "</td>";
+    row += "<td>" + note.notes + "</td>";
+    row += "</tr>";
+    tableBody.innerHTML += row;
+  });
+}
+
+const popupScreen = document.querySelector(".popup-screen");
+            const popupBox = document.querySelector(".popup-box");
+            const closeBtn = document.querySelector(".close-btn");
+            const btn = document.querySelector(".btn");
+    
+            function showpopup(){
+    
+                
+                    setTimeout(() => {
+                        popupScreen.classList.add("active");
+                        
+                    }, 50); //Popup the screen in 02 seconds after the page is loaded.
+                    
+                    
+                    closeBtn.addEventListener("click", () => {
+                        popupScreen.classList.remove("active"); //Close the popup screen on click the close button.
+                        
+                    });
+                    
+                    setTimeout(() => {
+                        popupScreen.classList.remove("active"); //Close the popup screen on click the close button.
+    
+                    }, 3000); //Popup the screen in 02 seconds after the page is loaded.
+    
+            }
+      
+
+            document.getElementById("deleteData").addEventListener("click", function(event) {
+  event.preventDefault(); // Prevent the default behavior of the link
+  
+  if (confirm("Are you sure you want to delete all data?")) {
+    localStorage.removeItem("allNotes");
+    alert("All data has been deleted.");
+  }
+});
+
+</script>
+
+
+</body>
+</html>
